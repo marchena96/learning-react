@@ -75,7 +75,7 @@ function callToAPI(ciudad, pais) {
             // b) Limpiamos antes de mostrar
             cleanHTML();
 
-            if (data.cod === "404") {
+            if (data.cod !== 200) {
                 displayErrorMessage('Ciudad no encontrada');
                 return;
             }
@@ -124,9 +124,6 @@ function mostrarClima(datos) {
     resultado.appendChild(resultadoDiv);
 }
 
-// function KelvinACentigrados(grados) {
-//     return parseInt(grados - 273.15);
-// }
 
 // Función para limpiar el HTML
 function cleanHTML(container) {
@@ -140,11 +137,12 @@ function spinner() {
     cleanHTML(resultado);
 
     const divSpinner = document.createElement('div');
-    divSpinner.classList.add('spinner');
+    divSpinner.classList.add('spinner'); // Esta clase activa el contenedor de los cubos
 
+    // Insertamos solo los dos cubos que pide tu CSS
     divSpinner.innerHTML = `
-        <div class="double-bounce1"></div>
-        <div class="double-bounce2"></div>
+        <div class="cube1"></div>
+        <div class="cube2"></div>
     `;
 
     resultado.appendChild(divSpinner);
