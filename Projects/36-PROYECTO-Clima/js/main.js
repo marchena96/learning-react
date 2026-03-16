@@ -53,8 +53,8 @@ function displayErrorMessage(message) {
     }
 }
 
-//4. Function call to API
-function callToAPI(pais, ciudad) {
+//4. Function call to API: 👀 El orden de los parametros es importante
+function callToAPI(ciudad, pais) {
 
     // Partes del endpoint:
     // 1. Base URL: La dirección del servidor
@@ -70,18 +70,22 @@ function callToAPI(pais, ciudad) {
 
     console.log(url); // Imprimir para ver si se armó bien
 
+    cleanHTML(resultado);
+
     // Luego haces el fetch(url)...
     // Realizar la petición
     fetch(url)
-        .then(response => response.json()) // Paso 1: Convertir a JSOn
+        .then(response => {
+            return response.json(); // Paso 1: Convertir a JSOn
+        })
         .then(data => {
             console.log(data);
+            cleanHTML(); // Función para borrar resultados anteriores
 
             if (data.cod === "404") {
                 displayErrorMessage('Ciudad no encontrada');
                 return;
             }
-
             //Paso 2: Mostrar resultado en el HTML
             mostrarClima(data);
         })
@@ -92,7 +96,7 @@ function mostrarClima(datos) {
     const { name, main: { temp, temp_max, temp_min } } = datos;
 
     // Limpiar el HTML previo
-    resultado.innerHTML = '';
+    cleanHTML(resultado);
 
     const nombreCiudad = document.createElement('p');
     nombreCiudad.textContent = `Clima en ${name}`;
@@ -127,6 +131,14 @@ function mostrarClima(datos) {
     resultado.appendChild(resultadoDiv);
 }
 
-function KelvinACentigrados(grados) {
-    return parseInt(grados - 273.15);
+// function KelvinACentigrados(grados) {
+//     return parseInt(grados - 273.15);
+// }
+
+// Función para limpiar el HTML
+function cleanHTML(container) {
+    // Verificamos que el contenedor exista antes de limpiar
+    if (container) {
+        container.replaceChildren();
+    }
 }
