@@ -34,9 +34,9 @@ function displayErrorMessage(message) {
     console.log(message);
 
     // Create alert
-    const alert = document.querySelector('.bg-red-100');
+    const preventAlert = document.querySelector('.bg-red-100');
 
-    if (!alert) {
+    if (!preventAlert) {
         const alert = document.createElement('div');
         alert.classList.add('bg-red-100', "border-red-400", "text-red-700", "px-4", "py-3", "rounded", "relative", "max-w-md", "mx-auto", "mt-6", "text-center");
 
@@ -55,7 +55,6 @@ function displayErrorMessage(message) {
 
 //4. Function call to API: 👀 El orden de los parametros es importante
 function callToAPI(ciudad, pais) {
-
     // Partes del endpoint:
     // 1. Base URL: La dirección del servidor
     // 2. El parámetro de búsqueda (ciudad y país)
@@ -65,28 +64,22 @@ function callToAPI(ciudad, pais) {
     const appId = 'fe2def66855116fa18212dbd82cd71d6';
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${ciudad},${pais}&appid=${appId}&units=metric`;
 
-    // Mostramos un spinner o mensaje de carga si quieres (opcional)
+    // a) Mostrar Spinner (la función spinner ya llama a cleanHTML)
+    spinner();
     console.log("Conectando...");
 
-    console.log(url); // Imprimir para ver si se armó bien
-
-    cleanHTML(resultado);
-
-    // Luego haces el fetch(url)...
     // Realizar la petición
     fetch(url)
-        .then(response => {
-            return response.json(); // Paso 1: Convertir a JSOn
-        })
+        .then(response => response.json()) // Paso 1: Convertir a JSOn
         .then(data => {
-            console.log(data);
-            cleanHTML(); // Función para borrar resultados anteriores
+            // b) Limpiamos antes de mostrar
+            cleanHTML();
 
             if (data.cod === "404") {
                 displayErrorMessage('Ciudad no encontrada');
                 return;
             }
-            //Paso 2: Mostrar resultado en el HTML
+            // c) Mostrar resultado en el HTML
             mostrarClima(data);
         })
         .catch(error => console.log('Error de red:', error));
@@ -141,4 +134,18 @@ function cleanHTML(container) {
     if (container) {
         container.replaceChildren();
     }
+}
+
+function spinner() {
+    cleanHTML(resultado);
+
+    const divSpinner = document.createElement('div');
+    divSpinner.classList.add('spinner');
+
+    divSpinner.innerHTML = `
+        <div class="double-bounce1"></div>
+        <div class="double-bounce2"></div>
+    `;
+
+    resultado.appendChild(divSpinner);
 }
