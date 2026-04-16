@@ -1,51 +1,64 @@
-const container = document.querySelector('.conatiner');
-const resultado = document.querySelector('#resultado');
-const form = document.querySelector('#formulario');
+import { countries } from './countries.js';
+import { showSuggestions, showError, showWeather, limpiarHTML, showSpinner } from './ui.js';
+import { fetchWeather, fetchCities } from './api.js';
 
-window.addEventListener('load', () => {
+const form = document.querySelector('#form'); // Corregido para coincidir con index.html
+const selectPais = document.querySelector('#pais');
+let timeoutId; // Para el debounce
+
+document.addEventListener('DOMContentLoaded', () => {
+    fillCountries();
     form.addEventListener('submit', buscarClima);
+
+    // ... (lógica del form y países)
+
+    inputCiudad.addEventListener('input', (e) => {
+        const query = e.target.value;
+
+        // Limpiamos el timeout anterior si el usuario sigue escribiendo
+        clearTimeout(timeoutId);
+
+        if (query.length < 3) return;
+
+        // Esperamos 500ms después de la última tecla
+        timeoutId = setTimeout(async () => {
+            const cities = await fetchCities(query);
+            showSuggestions(cities, (selectedCity) => {
+                inputCiudad.value = selectedCity.name;
+                // Podrías incluso guardar el país automáticamente:
+                document.querySelector('#pais').value = selectedCity.country;
+            });
+        }, 500);
+    });
 });
 
-function buscarClima(e) {
-    e.preventDefault();
+function fillCountries() {
+    countries.forEach(country => {
+        const option = document.createElement('option');
+        option.value = country.code;
+        option.textContent = country.name;
+        selectPais.appendChild(option);
+    });
+}
 
-    // Validar
+async function buscarClima(e) {
+    e.preventDefault();
     const ciudad = document.querySelector('#ciudad').value;
-    const pais = document.querySelector('#pais').value;
+    const pais = selectPais.value;
 
     if (ciudad === '' || pais === '') {
-        showError('Ambos campos son obligatorios');
+        showError('Ambos campos son obligatorios'); // Lógica de app.js
         return;
     }
+    // 1. Mostrar Spinner mientras esperamos la respuesta
+    showSpinner();
 
-    // Consulta a la API
-}
+    const data = await fetchWeather(ciudad, pais);
+    limpiarHTML();
 
-function showError(message) {
-    console.log(message);
-    const alert = document.querySelector('.bg-red-100');
-
-    if (!alert) {
-        const alert = document.createElement('div');
-        alert.classList.add('bg-red-100', "border-red-400", "text-red-700", "px-4", "py-3", "rounded", "relative", "max-w-md", "mx-auto", "mt-6", "text-center");
-
-        alert.innerHTML = `
-          <strong class="font-bold">Error!</strong>
-          <span class="block sm:inline">${message}</span>
-      `;
-
-        container.appendChild(alert);
-        setTimeout(() => {
-            alert.remove();
-        }, 3000);
-
+    if (data) {
+        showWeather(data);
+    } else {
+        showError('No se pudo encontrar el clima de esa ciudad');
     }
-
-
-}
-
-
-function requestAPI(ciudad, pais) {
-    const API_KEY = 'fe2def66855116fa18212dbd82cd71d6';
-    const URL = `https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}`
 }
