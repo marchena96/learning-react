@@ -1,4 +1,4 @@
-﻿import { createContext, useState, type ReactNode } from "react";
+﻿import { createContext, useState, useCallback, useMemo, type ReactNode } from "react";
 
 type PaginationContextType = {
   currentPage: number;
@@ -15,14 +15,17 @@ export const PaginationProvider = ({ children }: { children: ReactNode }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 10;
 
-  const nextPage = () => setCurrentPage((prev) => prev + 1);
-  const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 0));
-  const resetPage = () => setCurrentPage(0);
+  const nextPage = useCallback(() => setCurrentPage((prev) => prev + 1), []);
+  const prevPage = useCallback(() => setCurrentPage((prev) => Math.max(prev - 1, 0)), []);
+  const resetPage = useCallback(() => setCurrentPage(0), []);
+
+  const value = useMemo(
+    () => ({ currentPage, pageSize, setCurrentPage, nextPage, prevPage, resetPage }),
+    [currentPage, pageSize, nextPage, prevPage, resetPage]
+  );
 
   return (
-    <PaginationContext.Provider
-      value={{ currentPage, pageSize, setCurrentPage, nextPage, prevPage, resetPage }}
-    >
+    <PaginationContext.Provider value={value}>
       {children}
     </PaginationContext.Provider>
   );

@@ -23,7 +23,14 @@ const ProductGrid = ({ products }: Props) => {
           <h3>{product.title}</h3>
           <p>ID: {product.id}</p>
           <p>Price: {product.price}</p>
-          <p>Rating: {product.rating}</p>
+          {/* Mostrar rating soportando diferentes shapes devueltos por la API */}
+          {typeof product.rating === "number" ? (
+            <p>Rating: {product.rating}</p>
+          ) : product.rating && (product.rating as any).rate ? (
+            <p>Rating: {(product.rating as any).rate}</p>
+          ) : (
+            <p>Rating: N/A</p>
+          )}
           <Link to={"/products/$productId"} params={{ productId: String(product.id) }}>
             Ver detalle
           </Link>
