@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import type { Product } from "../types";
 
 type Props = {
@@ -15,6 +16,7 @@ const ProductGrid = ({ products }: Props) => {
     >
       {products.map((product) => (
         <article
+          key={product.id}
           style={{ border: "1px solid #444", padding: 10, borderRadius: 8 }}
         >
           {/* INSTRUCCION: ajustar renderizado de lista */}
@@ -22,7 +24,9 @@ const ProductGrid = ({ products }: Props) => {
           <p>ID: {product.id}</p>
           <p>Price: {product.price}</p>
           <p>Rating: {product.rating}</p>
-          <a href={`/products/${product.id}`}>Ver detalle</a>
+          <Link to={"/products/$productId"} params={{ productId: String(product.id) }}>
+            Ver detalle
+          </Link>
           {/* INSTRUCCION: ajustar navegación al detalle */}
         </article>
       ))}

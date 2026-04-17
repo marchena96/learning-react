@@ -1,43 +1,49 @@
-﻿import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState, useContext } from "react";
 import ProductGrid from "../components/ProductGrid";
 import PaginationControls from "../components/PaginationControls";
-import { getProducts } from "../services/productService";
-import type { Product } from "../types";
+import { PaginationContext } from "../context/PaginationContext";
+import { usePaginatedProducts } from "../hooks/usePaginatedProducts";
 
 const ProductsPage = () => {
   // INSTRUCCION: conserva los bugs y completa la plantilla.
-  const [products, setProducts] = useState<Product[]>([]);
   const [query, setQuery] = useState("");
   const queryInputRef = useRef<HTMLInputElement>(null);
-  
+
   // INSTRUCCION: agregar useContext(PaginationContext) y obtener:
   // currentPage, pageSize, resetPage.
-  const currentPage = 0; // Placeholder
-  const pageSize = 10; // Placeholder
-  const resetPage = () => {}; // Placeholder
+  const context = useContext(PaginationContext);
+
+  if (!context) {
+    return <p>Error: PaginationContext no disponible</p>;
+  }
+
+  const { currentPage, pageSize, resetPage } = context;
 
   // INSTRUCCION: esta lógica de carga debe extraerse a un hook aparte
   // (por ejemplo: usePaginatedProducts) y este componente
   // solo debe consumir el resultado del hook.
-  useEffect(() => {
-    
-  }, [currentPage, pageSize, query]);
+  const { products, isLoading, totalCount } = usePaginatedProducts({
+    query,
+    currentPage,
+    pageSize,
+  });
 
   // INSTRUCCION: los resultados y la paginación deben salir del llamado a API.
+  const totalPages = Math.ceil(totalCount / pageSize);
 
+  // Al filtrar por title, volver siempre a la página 1.
   useEffect(() => {
-    // Al filtrar por title, volver siempre a la página 1.
     resetPage();
-  }, [query]);
+  }, [query, resetPage]);
 
   const handleQueryChange = () => {
     // (INSTRUCCION: implementar)
-    setQuery();
+    setQuery(queryInputRef.current?.value || "");
   };
 
   // INSTRUCCION: calcular totalPages y resultados visibles.
 
-  if (products.length > 0) {
+  if (isLoading && products.length === 0) {
     return <p>Cargando...</p>;
   }
 
@@ -52,7 +58,7 @@ const ProductsPage = () => {
       />
 
       <ProductGrid products={products} />
-      <PaginationControls/>
+      <PaginationControls totalPages={totalPages} />
     </main>
   );
 };

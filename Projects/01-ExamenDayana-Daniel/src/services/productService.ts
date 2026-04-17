@@ -14,13 +14,23 @@ export async function getProducts({ offset, limit, title }: GetProductsParams): 
   // 2) Agregar title cuando exista.
   // 3) Hacer fetch a la API.
   // 4) Retornar el arreglo tipado de productos.
-  throw new Error("INSTRUCCION: implementar getProducts");
+  const params = new URLSearchParams({
+    offset: String(offset),
+    limit: String(limit),
+  });
+
+  if (title) {
+    params.append("title", title);
+  }
+
+  const response = await fetch(`${API_URL}?${params}`);
+  const products: Product[] = await response.json();
+  return products;
 }
 
 export async function getProductById(id: number): Promise<Product> {
-  // INSTRUCCION:
-  // 1) Consumir /products/{id}.
-  // 2) Retornar el producto tipado.
-  throw new Error("INSTRUCCION: implementar getProductById");
+  const response = await fetch(`${API_URL}/${id}`);
+  const product: Product = await response.json();
+  return product;
 }
 

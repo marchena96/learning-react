@@ -4,17 +4,18 @@ import { getProductById } from "../services/productService";
 import type { Product } from "../types";
 
 const ProductDetailPage = () => {
- 
-  const { id } = useParams({ from: "/products/$productId" });
+
+  const { productId } = useParams({ from: "/products/$productId" });
   const [product, setProduct] = useState<Product | null>(null);
 
   {/* INSTRUCCION: extraer este bloque a un custom hook */}
   useEffect(() => {
+    if (!productId) return;
     (async () => {
-      const data = await getProductById(Number(id));
+      const data = await getProductById(Number(productId));
       setProduct(data);
     })();
-  }, []);
+  }, [productId]);
 
   if (!product) return <p>Cargando detalle...</p>;
 
