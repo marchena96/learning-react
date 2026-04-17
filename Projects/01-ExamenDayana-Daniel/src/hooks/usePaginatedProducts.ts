@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { getProducts } from "../services/productService";
 import type { Product } from "../types";
 
+const totalCountByQuery = new Map<string, number>();
+
 type UsePaginatedProductsProps = {
   query: string;
   currentPage: number;
@@ -11,7 +13,7 @@ type UsePaginatedProductsProps = {
 export function usePaginatedProducts({ query, currentPage, pageSize }: UsePaginatedProductsProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalCount, setTotalCount] = useState(() => totalCountByQuery.get(query) || 0);
 
   useEffect(() => {
     setIsLoading(true);
@@ -24,13 +26,19 @@ export function usePaginatedProducts({ query, currentPage, pageSize }: UsePagina
     })
       .then((data) => {
         setProducts(data);
-        // La API devuelve exactamente los resultados, asumimos que si devolvió menos de pageSize
-        // es que llegamos al final
+
+        // Si recibimos menos items de los solicitados, hemos llegado al final
         if (data.length < pageSize) {
-          setTotalCount(offset + data.length);
+          const exactTotal = offset + data.length;
+          totalCountByQuery.set(query, exactTotal);
+          setTotalCount(exactTotal);
         } else {
-          // Estimamos que hay más resultados
-          setTotalCount(offset + pageSize + 1);
+          // Recibimos pageSize items, sabemos que hay al menos esto
+          // Guardamos la mejor estimación que tenemos hasta ahora
+          const currentKnown = totalCountByQuery.get(query) || 0;
+          const newEstimate = Math.max(currentKnown, offset + pageSize + 1);
+          totalCountByQuery.set(query, newEstimate);
+          setTotalCount(newEstimate);
         }
       })
       .finally(() => setIsLoading(false));
@@ -38,3 +46,7 @@ export function usePaginatedProducts({ query, currentPage, pageSize }: UsePagina
 
   return { products, isLoading, totalCount };
 }
+
+
+
+
