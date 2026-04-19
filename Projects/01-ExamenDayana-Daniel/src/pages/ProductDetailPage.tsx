@@ -9,7 +9,8 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
 
   {/* INSTRUCCION: extraer este bloque a un custom hook */ }
-  useEffect(() => {    if (!productId) return;
+  useEffect(() => {
+    if (!productId) return;
     (async () => {
       const data = await getProductById(Number(productId));
       setProduct(data);
